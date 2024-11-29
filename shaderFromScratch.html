@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Polygon Duck</title>
+</head>
+
+<body>
+    <script id="vertexShader" type="not-js">
+        attribute vec3 vPosition;
+        attribute vec3 vColor;
+        attribute vec3 normal; 
+        varying vec3 fColor;
+        varying vec3 fPos;
+        varying vec3 fNormal;
+        varying vec3 fCameraPos;
+        varying vec3 fCAMNormal;
+        uniform mat4 uMVP;
+  
+        void main(void) {
+          gl_Position = uMVP * vec4(vPosition, 1.0);
+          fColor = vColor;
+          fPos = vPosition;
+          fNormal = normal;
+          fCAMNormal = (uMVP * vec4(normal, 1.0)).xyz;
+          fCameraPos = (uMVP * vec4(vPosition, 1.0)).xyz;
+        }
+      </script>
+
+    <script id="fragmentShader" type="not-js">
+        precision highp float;
+        varying vec3 fColor;
+        varying vec3 fPos;
+        varying vec3 fNormal;
+        varying vec3 fCAMNormal;
+        varying vec3 fCameraPos;
+        uniform vec3 sliderVal1;
+        uniform vec3 sliderVal2;
+        uniform int checkboxVal;
+        const float specular_coeff  = 1.0;
+        const float specular_exp    = 32.0;
+  
+        void main(void) {
+            vec3 OBJdir = vec3(0,0,sliderVal1.x); // from z-dir in obj space
+            vec3 OBJcolor;
+            if(checkboxVal == 1) {
+                OBJcolor = vec3(0.2,0.1,0.8); // pinkish
+            } else {
+                OBJcolor = vec3(0.25,0.25,0.25); // white
+            }
+            
+            float OBJdiffuse = 0.0 + dot(fNormal,OBJdir); // light fixed in object space
+            vec3 sceneDiffuse = OBJdiffuse * OBJcolor;
+
+            vec3 CamDir = vec3(0,0,1);
+            vec3 CamColor = vec3(0,0.3,0.3);
+
+            vec3 l = normalize(CamDir);
+            vec3 n = normalize(fCAMNormal); 
+            vec3 e = normalize(fCameraPos);
+            vec3 h = normalize (e+l);
+
+            vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * CamColor;
+
+           
+            gl_FragColor = vec4(sceneDiffuse + fColor + specular_color, 1.0);
+
+            if(fPos.x > sliderVal2.x) discard; // adjustable "pixel limit" in x-dir obj space
+        }
+      </script>
+
+    <canvas id="myCanvas" width="500" height="500" style="border: 1px solid black;"></canvas>
+    <h4>Rotate Camera:</h4>
+    <input id="slider1" type="range" min="-100" max="100" />
+    <h4>Adjust Lighting:</h4>
+    <input id="slider2" type="range" min="-100" max="100" />
+    <input id="checkbox1" type="checkbox" value="false" style="width: 100px; height: 20px;">
+    <label for="checkbox1">Fun Lighting</label>
+    <h4>Move Duck:</h4>
+    <input id="slider3" type="range" min="-100" max="100" />
+    <h4>Erase Duck:</h4>
+    <input id="slider4" type="range" min="-110" max="110" />
+    <script src="HostApplication.js" id="module"></script>
+    <script src="gl-matrix-min.js" id="module"></script>
+</body>
+
+</html>
