@@ -275,12 +275,12 @@ function start() {
         var pixelLimit = vec3.create();
         pixelLimit = [slider4.value / 100,0,0];
 	
-        // Circle around the y-axis
+        // Circle in xz plane
         var eye = [400*Math.sin(angle1),150.0,400.0*Math.cos(angle1)];
         var target = [0,0,0];
         var up = [0,1,0];
 	
-        // Sin fn along the x-axis
+        // Sin fn in xy plane
         var angle2 = slider3.value*0.01*Math.PI;
         var tModel = mat4.create();
         mat4.fromScaling(tModel,[100,100,100]);
